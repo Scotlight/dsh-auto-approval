@@ -1,0 +1,6 @@
+id,item,status,done_at,notes
+1,补全并检查自动审批运行时监听器诊断,DONE,2026-08-17T08:42:29+08:00,settings diagnostics 已补入且 typecheck 通过
+2,后台构建并重启 DSH,DONE,2026-08-17T08:42:29+08:00,后台构建成功并重启为 PID 20428
+3,读取诊断并定位审批监听器失效原因,DONE,2026-08-17T12:35:00+08:00,真根因=appendAudit裸函数调用丢receiver抛TypeError被吞成unavailable;已修复并经auto-approval/reviewed审计事件验证
+4,修复真实审批链路并做端到端实测,DONE,2026-08-17T21:05:00+08:00,x666 glm-5.2 chat通道实测:allow/deny/rejected全部落地
+5,清理临时诊断并后台跑完整验证,DONE,2026-08-17T21:10:00+08:00,探针/测试文件/接收端/归档session全部清理,typecheck+build通过,DSH已用clean构建重启

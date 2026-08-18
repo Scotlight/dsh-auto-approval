@@ -1,0 +1,22 @@
+# Add the automatic reviewer and one permission preset that opts into it.
+- id: permission
+  config:
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+      auto-approval:
+        sandbox: workspace-write
+        approval: ask
+        name: Auto Approve
+        description: Review each approval request with the configured independent model.
+
+- insert:
+    - id: auto-approval
+      name: dsh-auto-approval
