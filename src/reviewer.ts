@@ -90,7 +90,7 @@ function responseText(body: unknown): string {
 const riskLevels = new Set(['low', 'medium', 'high', 'critical'])
 const outcomes = new Set(['allow', 'deny'])
 
-// Chat models sometimes answer with schema-adjacent synonyms (e.g. glm-5.2
+// Chat models sometimes answer with schema-adjacent synonyms (e.g. some models
 // returned "request_confirmation" / "not_authorized"). Map the common ones to
 // the nearest allowed value, fail-closed, instead of burning retries on a
 // model that will answer the same way again.
