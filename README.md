@@ -64,6 +64,12 @@ pnpm test        # vitest: evidence recovery, output parsing tolerance, breaker 
 - [codex-rs/core/src/guardian/policy_template.md](https://github.com/openai/codex/blob/main/codex-rs/core/src/guardian/policy_template.md)
 - [Codex sandboxing/auto-review docs](https://learn.chatgpt.com/docs/sandboxing/auto-review)
 
+### Deep dives
+
+- [Architecture](docs/architecture.md) — the approval waterfall mount point, evidence assembly, dual API styles, three-state breaker, and the sidecar-audit decision
+- [Policy & verdicts](docs/policy.md) — the risk × authorization matrix, untrusted-evidence rules, the two-condition injection test, and known limits
+- [Field notes](docs/field-notes.md) — three days of gotchas: traceable-proxy receiver loss, the session-log vocabulary brick, four relay-channel quirks, and the live testing methodology
+
 ## License
 
 MIT
