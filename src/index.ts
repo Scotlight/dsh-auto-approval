@@ -2,6 +2,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-permission-presets'
 import type {} from '@deepseek-ai/dsh-settings'
+import type {} from '@deepseek-ai/dsh-tools'
 import type {} from '@deepseek-ai/dsh-user-approval'
 import { ReviewSession } from './approval.js'
 import {
@@ -34,8 +35,15 @@ export function apply(ctx: Context, base: AutoApprovalConfig = {}): () => void {
     async (request, next) => reviews.decide(request, next),
     { prepend: true, global: true },
   )
+  // Replay the reviewer's deny rationale into the denied call's tool result so
+  // the calling model sees WHY it was denied (course-correct, not retry blind).
+  const disposePostExecute = ctx.on(
+    'tools/post-execute',
+    async (exec, result, next) => reviews.injectDenyReason(exec, result, next) as Promise<never>,
+  )
   installAutoApprovalWeb(ctx, new AutoApprovalWebBackend(ctx))
   return () => {
     disposeApproval()
+    disposePostExecute()
   }
 }

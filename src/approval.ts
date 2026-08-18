@@ -19,6 +19,14 @@ import type { ReviewAudit } from './types.js'
 
 type NextApproval = () => Promise<ApprovalOutcome>
 
+/** How long a recorded deny reason stays available for its tool result. */
+const FEEDBACK_TTL_MS = 10 * 60 * 1000
+
+interface DenyFeedback {
+  text: string
+  at: number
+}
+
 // Audit goes to a sidecar JSONL, NOT the session log: Session.append has no
 // `ignorable` envelope option, so an out-of-vocabulary session event bricks the
 // log's resume (SessionFormatUnsupportedError on next startup). Sidecar keeps
@@ -57,6 +65,11 @@ function delegateAudit(
 }
 
 export class ReviewSession {
+  /** Deny reasons keyed by callId, replayed into the tool result by the
+   * post-execute hook so the calling model learns WHY it was denied instead
+   * of retrying blind. */
+  private readonly denyFeedback = new Map<string, DenyFeedback>()
+
   constructor(
     private readonly ctx: Context,
     private readonly config: () => AutoApprovalConfig,
@@ -64,8 +77,7 @@ export class ReviewSession {
     private readonly circuit = new TurnCircuitBreaker(),
   ) {}
 
-  async decide(request: ApprovalRequest, next: NextApproval): Promise<ApprovalOutcome> {
-    const startedAt = Date.now()
+  async decide(request: ApprovalRequest, next: NextApproval): Promise<ApprovalOutcome> {    const startedAt = Date.now()
     let config
     try {
       config = resolveConfig(this.config())
@@ -105,6 +117,7 @@ export class ReviewSession {
 
     const openReason = this.circuit.isOpen(key, config)
     if (openReason !== undefined) {
+      this.recordDenyFeedback(action.callId, openReason)
       appendAudit(request.agent.session, {
         reviewId: 'circuit-' + startedAt + '-' + action.callId,
         turn: action.turn,
@@ -138,6 +151,9 @@ export class ReviewSession {
     try {
       const result = await this.client.review(config, credential.value, evidence, request.signal)
       const denied = result.assessment.outcome === 'deny'
+      if (denied) {
+        this.recordDenyFeedback(action.callId, result.assessment.rationale)
+      }
       this.circuit.record(key, denied ? 'denied' : 'allowed', config)
       appendAudit(request.agent.session, {
         reviewId: evidence.reviewId,
@@ -180,5 +196,36 @@ export class ReviewSession {
       this.ctx.logger.warn('dsh-auto-approval review failed: %s', reviewError.code)
       return next()
     }
+  }
+
+  private recordDenyFeedback(callId: string, reason: string): void {
+    const now = Date.now()
+    for (const [key, entry] of this.denyFeedback) {
+      if (now - entry.at > FEEDBACK_TTL_MS) this.denyFeedback.delete(key)
+    }
+    this.denyFeedback.set(callId, {
+      text: `[auto-approval] 拒绝原因：${reason}\n如需执行此操作，请调整方案（缩小范围/更换路径/说明用途）后在对话中重新说明；不要尝试绕过或间接执行。`,
+      at: now,
+    })
+  }
+
+  /**
+   * The `tools/post-execute` hook: when a call THIS plugin denied comes back
+   * with its generic rejection result, replace the model-visible text with the
+   * reviewer's rationale so the agent can course-correct instead of retrying
+   * blind. Any other call passes through untouched.
+   */
+  injectDenyReason(
+    exec: { callId?: unknown },
+    result: Readonly<{ isError?: boolean }>,
+    next: () => Promise<unknown>,
+  ): Promise<{ kind: 'block'; feedback: Array<{ type: 'text'; text: string }> } | unknown> {
+    const callId = typeof exec.callId === 'string' ? exec.callId : undefined
+    if (callId === undefined) return next()
+    const entry = this.denyFeedback.get(callId)
+    if (entry === undefined) return next()
+    this.denyFeedback.delete(callId)
+    if (result.isError !== true) return next()
+    return Promise.resolve({ kind: 'block', feedback: [{ type: 'text', text: entry.text }] })
   }
 }
