@@ -54,6 +54,10 @@ dsh plugin --profile web add /path/to/dsh-auto-approval
 
 ![settings](docs/screenshot-settings.png)
 
+「连通与策略」区提供一键连通性测试（发一条真实探针评审，返回判决/风险/授权分级/理由/延迟——一发验证端点、模型、Key、API 风格和策略文档）和策略文档编辑器（内置 Codex Guardian 全文，可编辑替换，下一次评审即生效，无需重启）：
+
+![策略编辑器](docs/screenshot-policy.png)
+
 - **接口地址**：任何 OpenAI 兼容端点（如 `https://your-endpoint/v1`）
 - **评审模型**：模型名（建议用与主模型不同源的模型，交叉评审）
 - **API Key**：存入 DSH 凭据库（`DSH_AUTO_APPROVAL_API_KEY`），不落仓库

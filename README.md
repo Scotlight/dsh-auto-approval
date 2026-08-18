@@ -49,6 +49,10 @@ Restart DSH Web, then fill in **Settings → Plugins → Plugin config → DSH �
 
 ![settings](docs/screenshot-settings.png)
 
+The **连通与策略** section has a one-click connectivity test (sends a real probe review and shows the verdict, risk/auth grades, rationale and latency — verifying endpoint, model, key, API style and policy in one shot) and a policy-document editor (the full Codex Guardian policy text ships built-in; edit or replace it, effective on the next review without restart):
+
+![policy editor](docs/screenshot-policy.png)
+
 Then: any OpenAI-compatible endpoint, a reviewer model, and the API key (stored in the DSH credential store, never in the repo). Pick the **Auto Approve** preset in a session to activate.
 
 ### Development
