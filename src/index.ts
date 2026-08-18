@@ -10,7 +10,8 @@ import {
   Config,
   type AutoApprovalConfig,
 } from './config.js'
-import { AutoApprovalWebBackend, installAutoApprovalWeb } from './web.js'
+import { ReviewClient } from './reviewer.js'
+import { AutoApprovalWebBackend, AutoApprovalWebOps, installAutoApprovalWeb, installAutoApprovalOpsWeb } from './web.js'
 
 export const name = 'dsh-auto-approval'
 export { Config }
@@ -42,6 +43,7 @@ export function apply(ctx: Context, base: AutoApprovalConfig = {}): () => void {
     async (exec, result, next) => reviews.injectDenyReason(exec, result, next) as Promise<never>,
   )
   installAutoApprovalWeb(ctx, new AutoApprovalWebBackend(ctx))
+  installAutoApprovalOpsWeb(ctx, new AutoApprovalWebOps(ctx, settings, new ReviewClient()))
   return () => {
     disposeApproval()
     disposePostExecute()

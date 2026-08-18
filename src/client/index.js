@@ -3,6 +3,8 @@
 const React = require("react");
 const h = React.createElement;
 const SETTINGS_ROUTE = "/_dsh/auto-approval/settings";
+const POLICY_ROUTE = "/_dsh/auto-approval/policy";
+const TEST_ROUTE = "/_dsh/auto-approval/test";
 
 const css = ".daa-card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);border-radius:6px;list-style:none;overflow:hidden}.daa-header{width:100%;min-height:52px;color:inherit;font:inherit;text-align:left;cursor:pointer;background:transparent;border:0;display:flex;align-items:center;justify-content:space-between;padding:12px 14px}.daa-header:hover{background:var(--dsw-alias-interactive-bg-hover)}.daa-title{color:var(--dsw-alias-label-primary);font-weight:600}.daa-chevron{color:var(--dsw-alias-label-tertiary);font-size:13px;transition:transform .12s}.daa-chevron-open{transform:rotate(180deg)}.daa-body{border-top:1px solid var(--dsw-alias-border-l2);padding:14px}.daa-loading,.daa-error{font-size:13px;line-height:1.5}.daa-loading{color:var(--dsw-alias-label-tertiary)}.daa-error{color:var(--dsw-alias-label-danger,#c93f48);margin-bottom:10px}.daa-form{display:flex;flex-direction:column;gap:14px}.daa-toggle{display:flex;align-items:center;gap:9px;color:var(--dsw-alias-label-primary);font-size:14px;font-weight:600;cursor:pointer}.daa-toggle input{width:16px;height:16px;margin:0}.daa-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}.daa-field{display:flex;flex-direction:column;gap:6px;min-width:0}.daa-field-wide{grid-column:1/-1}.daa-label{color:var(--dsw-alias-label-secondary);font-size:13px}.daa-input,.daa-select{width:100%;height:34px;box-sizing:border-box;border:1px solid var(--dsw-alias-border-l2);border-radius:4px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;padding:0 9px}.daa-input:focus,.daa-select:focus{outline:2px solid var(--dsw-alias-button-info-fill);outline-offset:1px}.daa-key-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}.daa-status{color:var(--dsw-alias-label-tertiary);font-size:12px}.daa-clear{display:flex;align-items:center;gap:7px;color:var(--dsw-alias-label-secondary);font-size:13px;white-space:nowrap;height:34px}.daa-section{border-top:1px solid var(--dsw-alias-border-l2);padding-top:12px}.daa-section-title{color:var(--dsw-alias-label-secondary);font-size:13px;font-weight:600;margin-bottom:10px}.daa-actions{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--dsw-alias-border-l2);padding-top:12px}.daa-button{height:34px;border:1px solid var(--dsw-alias-border-l2);border-radius:4px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;padding:0 14px;cursor:pointer}.daa-button:hover{background:var(--dsw-alias-interactive-bg-hover)}.daa-button-primary{border-color:var(--dsw-alias-button-info-fill);background:var(--dsw-alias-button-info-fill);color:var(--dsw-alias-button-info-label,#fff)}.daa-button:disabled{cursor:not-allowed;opacity:.55}@media(max-width:680px){.daa-grid{grid-template-columns:minmax(0,1fr)}.daa-field-wide{grid-column:auto}.daa-key-row{grid-template-columns:minmax(0,1fr)}.daa-clear{height:auto}.daa-actions{justify-content:stretch}.daa-button{flex:1}}@media(prefers-reduced-motion:reduce){.daa-chevron{transition:none}}.daa-select-wrap{position:relative}.daa-select-trigger{display:flex;align-items:center;justify-content:space-between;text-align:left;cursor:pointer}.daa-select-open{border-color:var(--dsw-alias-button-info-fill);box-shadow:0 0 0 2px rgba(120,180,255,.22)}.daa-select-chevron{color:var(--dsw-alias-label-tertiary);font-size:16px;line-height:1;transform:translateY(-1px)}.daa-select-menu{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow:auto;padding:4px;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;background:var(--dsw-alias-bg-layer-2);box-shadow:0 8px 24px #0008}.daa-select-option{display:block;width:100%;border:0;border-radius:4px;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;text-align:left;padding:8px 9px;cursor:pointer}.daa-select-option:hover,.daa-select-option:focus-visible{background:var(--dsw-alias-interactive-bg-hover);outline:none}.daa-select-option-selected{background:var(--dsw-alias-interactive-bg-hover-accent);color:var(--dsw-alias-label-primary-foreground,var(--dsw-alias-label-primary))}";
 if (typeof document !== "undefined" && document.querySelector('style[data-plugin-css="dsh-auto-approval"]') === null) {
@@ -10,6 +12,15 @@ if (typeof document !== "undefined" && document.querySelector('style[data-plugin
   style.dataset.pluginCss = "dsh-auto-approval";
   style.textContent = css;
   document.head.appendChild(style);
+}
+
+async function opsRequest(route, init) {
+  const response = await fetch(route, Object.assign({ credentials: "same-origin" }, init));
+  const body = await response.json();
+  if (!response.ok || body.ok !== true) {
+    throw new Error(body && body.error && body.error.message ? body.error.message : "请求失败（HTTP " + response.status + "）");
+  }
+  return body.value;
 }
 
 async function apiRequest(init) {
@@ -169,6 +180,106 @@ function NumberField(props) {
   );
 }
 
+function OpsSection(props) {
+  const [testing, setTesting] = React.useState(false);
+  const [testResult, setTestResult] = React.useState(null);
+  const [policy, setPolicy] = React.useState(null);
+  const [policyDraft, setPolicyDraft] = React.useState(null);
+  const [savingPolicy, setSavingPolicy] = React.useState(false);
+  const [policyMsg, setPolicyMsg] = React.useState(null);
+  const [policyOpen, setPolicyOpen] = React.useState(false);
+
+  const loadPolicy = async () => {
+    try {
+      const snapshot = await opsRequest(POLICY_ROUTE, { method: "GET" });
+      setPolicy(snapshot);
+      setPolicyDraft(snapshot.effective);
+      setPolicyMsg(null);
+    } catch (error) {
+      setPolicyMsg({ kind: "error", text: error.message });
+    }
+  };
+
+  React.useEffect(() => { if (policyOpen && policy === null) loadPolicy(); }, [policyOpen]);
+
+  const runTest = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      setTestResult(await opsRequest(TEST_ROUTE, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }));
+    } catch (error) {
+      setTestResult({ ok: false, error: error.message });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const savePolicy = async () => {
+    setSavingPolicy(true);
+    setPolicyMsg(null);
+    try {
+      const snapshot = await opsRequest(POLICY_ROUTE, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: policyDraft }),
+      });
+      setPolicy(snapshot);
+      setPolicyMsg({ kind: "ok", text: snapshot.source === "builtin" ? "已恢复内置策略文档" : "策略文档已保存（自定义生效）" });
+    } catch (error) {
+      setPolicyMsg({ kind: "error", text: error.message });
+    } finally {
+      setSavingPolicy(false);
+    }
+  };
+
+  const resetPolicy = () => setPolicyDraft("");
+
+  const verdict = testResult && testResult.ok && testResult.assessment
+    ? testResult.assessment.outcome.toUpperCase()
+      + " (risk=" + testResult.assessment.risk_level
+      + ", auth=" + testResult.assessment.user_authorization + ")"
+    : null;
+
+  return h("div", { className: "daa-section" },
+    h("div", { className: "daa-section-title" }, "连通与策略"),
+    h("div", { className: "daa-key-row" },
+      h("div", { className: "daa-status" }, policy && policy.source === "override" ? "当前策略：自定义覆盖" : "当前策略：内置 Codex Guardian 全文"),
+      h("button", { className: "daa-button", type: "button", disabled: testing, onClick: runTest }, testing ? "测试中..." : "测试连通"),
+    ),
+    testResult === null ? null : h("div", {
+      className: testResult.ok ? "daa-status" : "daa-error",
+      style: { marginTop: "6px" },
+    },
+      testResult.ok
+        ? "✔ 通道正常：" + testResult.model + " (" + testResult.apiStyle + ")，" + testResult.latencyMs + "ms，探针判决 " + verdict
+        : "✖ 失败：" + (testResult.error || "未知错误"),
+    ),
+    h("div", { style: { marginTop: "10px" } },
+      h("button", { className: "daa-button", type: "button", onClick: () => setPolicyOpen(next => !next) },
+        policyOpen ? "收起策略文档" : "查看/编辑策略文档"),
+    ),
+    policyOpen ? h("div", { style: { marginTop: "8px" } },
+      policy === null
+        ? h("div", { className: "daa-loading" }, "正在加载策略文档...")
+        : h("div", null,
+            h("textarea", {
+              className: "daa-input",
+              style: { width: "100%", height: "260px", boxSizing: "border-box", fontFamily: "monospace", fontSize: "12px", resize: "vertical" },
+              value: policyDraft,
+              disabled: !props.writable,
+              onChange: event => setPolicyDraft(event.target.value),
+            }),
+            policyMsg ? h("div", { className: policyMsg.kind === "ok" ? "daa-status" : "daa-error", style: { marginTop: "6px" } }, policyMsg.text) : null,
+            h("div", { className: "daa-actions", style: { borderTop: "none", paddingTop: "8px" } },
+              h("button", { className: "daa-button", type: "button", disabled: savingPolicy || !props.writable, onClick: resetPolicy }, "恢复内置"),
+              h("button", { className: "daa-button daa-button-primary", type: "button", disabled: savingPolicy || !props.writable, onClick: savePolicy }, savingPolicy ? "保存中..." : "保存策略"),
+            ),
+            h("div", { className: "daa-status", style: { marginTop: "6px" } }, "留空保存 = 恢复内置策略；策略下一次评审即生效（无需重启）"),
+          ),
+    ) : null,
+  );
+}
+
 function SettingsForm(props) {
   const state = props.state;
   const controller = props.controller;
@@ -204,6 +315,7 @@ function SettingsForm(props) {
 
   return h("div", { className: "daa-form" },
     state.error ? h("div", { className: "daa-error", role: "alert" }, state.error) : null,
+    h(OpsSection, { writable: data.writable }),
     h("label", { className: "daa-toggle" },
       h("input", {
         type: "checkbox",

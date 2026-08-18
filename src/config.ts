@@ -17,6 +17,9 @@ export interface AutoApprovalConfig {
   circuitConsecutiveDenials?: number
   circuitWindowReviews?: number
   circuitWindowDenials?: number
+  /** Optional full replacement of the reviewer policy document. Empty = the
+   * built-in Codex Guardian policy text. */
+  policyOverride?: string
 }
 
 export interface ResolvedAutoApprovalConfig {
@@ -31,11 +34,14 @@ export interface ResolvedAutoApprovalConfig {
   circuitConsecutiveDenials: number
   circuitWindowReviews: number
   circuitWindowDenials: number
+  /** Trimmed policy override; '' means the built-in policy is in effect. */
+  policyOverride: string
 }
-
 export const AUTO_APPROVAL_SETTINGS_NAMESPACE = settingsNamespace('auto-approval')
 export const AUTO_APPROVAL_CREDENTIAL: CredentialRef = credentialRef('DSH_AUTO_APPROVAL_API_KEY')
 export const AUTO_APPROVAL_PRESET = 'auto-approval'
+
+const MAX_POLICY_OVERRIDE_CHARS = 100_000
 
 export const Config: Schema<AutoApprovalConfig> = z.object({
   enabled: z.boolean().default(false),
@@ -49,6 +55,7 @@ export const Config: Schema<AutoApprovalConfig> = z.object({
   circuitConsecutiveDenials: z.number().default(3),
   circuitWindowReviews: z.number().default(50),
   circuitWindowDenials: z.number().default(10),
+  policyOverride: z.string().default(''),
 })
 
 function integer(name: string, value: number, minimum: number, maximum: number): number {
@@ -89,6 +96,7 @@ export function resolveConfig(config: AutoApprovalConfig): ResolvedAutoApprovalC
     ),
     circuitWindowReviews: integer('circuitWindowReviews', config.circuitWindowReviews ?? 50, 5, 200),
     circuitWindowDenials: integer('circuitWindowDenials', config.circuitWindowDenials ?? 10, 1, 100),
+    policyOverride: (config.policyOverride ?? '').slice(0, MAX_POLICY_OVERRIDE_CHARS),
   }
   if (resolved.circuitWindowDenials > resolved.circuitWindowReviews) {
     throw new TypeError('circuitWindowDenials must not exceed circuitWindowReviews')
