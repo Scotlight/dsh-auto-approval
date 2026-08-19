@@ -461,10 +461,13 @@ exports.apply = function apply(ctx) {
     decoratePermissionPreset();
     return () => observer.disconnect();
   }, "dsh-auto-approval: permission preset icon");
+  // settings.plugin.item is a *keyed* slot in DSH 0.1.0-rc.7 (was a list slot in
+  // rc.6). The key must equal the settings namespace registered server-side
+  // (AUTO_APPROVAL_SETTINGS_NAMESPACE = "auto-approval") — the settings-plugins
+  // tab only dispatches a card whose options.key is a served namespace.
   ctx.slots.inject("settings.plugin.item", () => ctx.slots.register({
     name: "settings.plugin.item",
-    id: "auto-approval",
-    order: 85,
+    key: "auto-approval",
     inject: () => ({ controller }),
   }, AutoApprovalCard));
 };
