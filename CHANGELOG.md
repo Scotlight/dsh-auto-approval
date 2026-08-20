@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.1 - 2026-08-20
+
+- Fix the DSH install command for pnpm's workspace-root check.
+
 ## 0.1.0 - 2026-08-20
 
 - Add independent model-backed review for DSH approval requests.

@@ -53,7 +53,7 @@ agent 请求审批 ──► 收集证据（工具调用 + 参数 + 外泄载荷
 需要 Node.js 22.19 或更高版本，以及 DSH 0.1 版本线中的 0.1.0-rc.6 或更高版本；开发和 CI 当前使用 rc.8。
 
 ```sh
-dsh plugin --profile web add dsh-guardian-approval@0.1.0
+dsh plugin --profile web add -w dsh-guardian-approval@0.1.1
 ```
 
 重启 DSH Web，在 **设置 → 插件 → 插件配置 → DSH 自动审批** 中填写：

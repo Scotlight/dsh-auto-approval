@@ -48,7 +48,7 @@ The configured reviewer receives sanitized tool arguments, bounded recent direct
 Requires Node.js 22.19 or later and DSH 0.1.0-rc.6 or later in the 0.1 release line. Development and CI use DSH rc.8.
 
 ```sh
-dsh plugin --profile web add dsh-guardian-approval@0.1.0
+dsh plugin --profile web add -w dsh-guardian-approval@0.1.1
 ```
 
 Restart DSH Web, then fill in **Settings → Plugins → Plugin config → DSH 自动审批**:
