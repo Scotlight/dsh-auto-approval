@@ -35,6 +35,10 @@ agent 请求审批 ──► 收集证据（工具调用 + 参数 + 外泄载荷
 - **旁路审计**：每次裁决（allow/deny/error/circuit-open/delegated）追加写入 `~/.dsh/auto-approval-audit.jsonl`，含风险/授权/理由
 - **双 API 风格**：`responses`（严格 json_schema）或 `chat`（OpenAI 兼容 `/chat/completions`），兼容各类中转渠道
 
+### 数据边界
+
+配置的评审器会接收已脱敏的工具参数、长度受限的近期用户消息，以及疑似外发动作涉及的最多 4 个本地文件片段（每个最多 2KB）。脱敏属于尽力而为，不能保证识别所有密钥格式；只应使用你信任、可以接触被评审工作区数据的评审端点。
+
 ### 实测效果（真实案例）
 
 | 动作 | 判定 | 理由 |
@@ -46,17 +50,19 @@ agent 请求审批 ──► 收集证据（工具调用 + 参数 + 外泄载荷
 
 ### 安装
 
+需要 Node.js 22.19 或更高版本，以及 DSH 0.1 版本线中的 0.1.0-rc.6 或更高版本；开发和 CI 当前使用 rc.8。
+
 ```sh
-dsh plugin --profile web add /path/to/dsh-guardian-approval
+dsh plugin --profile web add dsh-guardian-approval@0.1.0
 ```
 
 重启 DSH Web，在 **设置 → 插件 → 插件配置 → DSH 自动审批** 中填写：
 
-![settings](docs/screenshot-settings.png)
+![settings](https://raw.githubusercontent.com/Scotlight/dsh-guardian-approval/main/docs/screenshot-settings.png)
 
 「连通与策略」区提供一键连通性测试（发一条真实探针评审，返回判决/风险/授权分级/理由/延迟——一发验证端点、模型、Key、API 风格和策略文档）和策略文档编辑器（内置 Codex Guardian 全文，可编辑替换，下一次评审即生效，无需重启）：
 
-![策略编辑器](docs/screenshot-policy.png)
+![策略编辑器](https://raw.githubusercontent.com/Scotlight/dsh-guardian-approval/main/docs/screenshot-policy.png)
 
 - **接口地址**：任何 OpenAI 兼容端点（如 `https://your-endpoint/v1`）
 - **评审模型**：模型名（建议用与主模型不同源的模型，交叉评审）
@@ -92,4 +98,6 @@ pnpm test
 - [codex-rs/core/src/guardian/policy_template.md](https://github.com/openai/codex/blob/main/codex-rs/core/src/guardian/policy_template.md)
 - [Codex sandboxing/auto-review 文档](https://learn.chatgpt.com/docs/sandboxing/auto-review)
 
----
+## 许可证
+
+[MIT](LICENSE)

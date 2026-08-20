@@ -30,6 +30,10 @@ approval request ──► collect evidence (tool call + args + egress payload p
 - **Sidecar audit trail** — every verdict (allow/deny/error/circuit-open/delegated) is appended to `~/.dsh/auto-approval-audit.jsonl` with risk/authorization/rationale
 - **Dual API styles** — `responses` (strict json_schema) or `chat` (OpenAI-compatible `/chat/completions`) for relay/proxy providers
 
+### Data boundary
+
+The configured reviewer receives sanitized tool arguments, bounded recent direct-user messages, and, for egress-shaped actions, up to four 2KB local-file excerpts. Redaction is best-effort and cannot guarantee detection of every secret format. Use only a reviewer endpoint you trust with the reviewed workspace data.
+
 ### Verified behavior (live cases)
 
 | Action | Verdict | Rationale |
@@ -41,17 +45,19 @@ approval request ──► collect evidence (tool call + args + egress payload p
 
 ### Install
 
+Requires Node.js 22.19 or later and DSH 0.1.0-rc.6 or later in the 0.1 release line. Development and CI use DSH rc.8.
+
 ```sh
-dsh plugin --profile web add /path/to/dsh-guardian-approval
+dsh plugin --profile web add dsh-guardian-approval@0.1.0
 ```
 
 Restart DSH Web, then fill in **Settings → Plugins → Plugin config → DSH 自动审批**:
 
-![settings](docs/screenshot-settings.png)
+![settings](https://raw.githubusercontent.com/Scotlight/dsh-guardian-approval/main/docs/screenshot-settings.png)
 
 The **连通与策略** section has a one-click connectivity test (sends a real probe review and shows the verdict, risk/auth grades, rationale and latency — verifying endpoint, model, key, API style and policy in one shot) and a policy-document editor (the full Codex Guardian policy text ships built-in; edit or replace it, effective on the next review without restart):
 
-![policy editor](docs/screenshot-policy.png)
+![policy editor](https://raw.githubusercontent.com/Scotlight/dsh-guardian-approval/main/docs/screenshot-policy.png)
 
 Then: any OpenAI-compatible endpoint, a reviewer model, and the API key (stored in the DSH credential store, never in the repo). Pick the **Auto Approve** preset in a session to activate.
 
@@ -76,4 +82,4 @@ pnpm test        # vitest: evidence recovery, output parsing tolerance, breaker 
 
 ## License
 
-MIT
+[MIT](LICENSE)
