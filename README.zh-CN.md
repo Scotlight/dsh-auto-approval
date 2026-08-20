@@ -1,4 +1,4 @@
-# dsh-auto-approval
+# dsh-guardian-approval
 
 [English](README.md) · 简体中文
 
@@ -47,7 +47,7 @@ agent 请求审批 ──► 收集证据（工具调用 + 参数 + 外泄载荷
 ### 安装
 
 ```sh
-dsh plugin --profile web add /path/to/dsh-auto-approval
+dsh plugin --profile web add /path/to/dsh-guardian-approval
 ```
 
 重启 DSH Web，在 **设置 → 插件 → 插件配置 → DSH 自动审批** 中填写：

@@ -1,4 +1,4 @@
-# dsh-auto-approval
+# dsh-guardian-approval
 
 English · [简体中文](README.zh-CN.md)
 
@@ -42,7 +42,7 @@ approval request ──► collect evidence (tool call + args + egress payload p
 ### Install
 
 ```sh
-dsh plugin --profile web add /path/to/dsh-auto-approval
+dsh plugin --profile web add /path/to/dsh-guardian-approval
 ```
 
 Restart DSH Web, then fill in **Settings → Plugins → Plugin config → DSH 自动审批**:

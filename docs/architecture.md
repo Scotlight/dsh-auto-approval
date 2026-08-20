@@ -14,7 +14,7 @@ DSH 的审批流是一条 cordis waterfall。工具层（dsh-tools）决策 `ask
 dsh-tools (ask)
   └─► ApprovalService
         └─► waterfall 'approval/request'
-              ├─[prepend] dsh-auto-approval   ← 本插件
+              ├─[prepend] dsh-guardian-approval   ← 本插件
               │     ├─ allow  ──► 'allowed-once'，人工 UI 不再触发
               │     ├─ deny   ──► 'rejected'
               │     └─ 跳过   ──► next() 传给下一环
@@ -99,7 +99,7 @@ DSH's approval flow is a cordis waterfall. The tool layer (dsh-tools) emits `app
 dsh-tools (ask)
   └─► ApprovalService
         └─► waterfall 'approval/request'
-              ├─[prepend] dsh-auto-approval   ← this plugin
+              ├─[prepend] dsh-guardian-approval   ← this plugin
               │     ├─ allow  ──► 'allowed-once'; human UI never fires
               │     ├─ deny   ──► 'rejected'
               │     └─ skip   ──► next() passes to the next handler

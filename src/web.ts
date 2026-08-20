@@ -216,7 +216,7 @@ export class AutoApprovalWebBackend {
       const result = await this.save(parseSaveRequest(await jsonBody(req)))
       responseJson(res, 200, { ok: true, value: result })
     } catch (error) {
-      this.ctx.logger.warn('dsh-auto-approval settings save failed')
+      this.ctx.logger.warn('dsh-guardian-approval settings save failed')
       this.ctx.logger.warn(error)
       requestError(res, 409, 'save-failed', error instanceof Error ? error.message : '保存失败')
     }
@@ -316,7 +316,7 @@ export function installAutoApprovalWeb(ctx: Context, backend: AutoApprovalWebBac
         path: SETTINGS_ROUTE,
         handler: (req, res) => backend.handle(req, res),
       }),
-      'dsh-auto-approval: settings route',
+      'dsh-guardian-approval: settings route',
     )
   })
 }
@@ -357,7 +357,7 @@ export function installAutoApprovalOpsWeb(
           (error: unknown) => requestError(res, 400, 'bad-request', error instanceof Error ? error.message : '请求体无效'),
         )
       },
-    }), 'dsh-auto-approval: policy route')
+    }), 'dsh-guardian-approval: policy route')
     webCtx.effect(() => webCtx.webServer.register({
       kind: 'exact',
       path: TEST_ROUTE,
@@ -376,6 +376,6 @@ export function installAutoApprovalOpsWeb(
           ),
         )
       },
-    }), 'dsh-auto-approval: test route')
+    }), 'dsh-guardian-approval: test route')
   })
 }

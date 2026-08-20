@@ -1,7 +1,7 @@
 {
-  "name": "dsh-auto-approval",
+  "name": "dsh-guardian-approval",
   "version": "0.1.0",
-  "description": "Independent model-backed automatic approval plugin for DSH.",
+  "description": "Independent Codex Guardian-style approval reviewer for DSH.",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

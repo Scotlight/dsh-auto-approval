@@ -3,7 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 const source = await readFile(new URL('../src/client/index.js', import.meta.url), 'utf8')
 const output = [
   'window.__ModuleLoader__.load({',
-  '  id: "dsh-auto-approval",',
+  '  id: "dsh-guardian-approval",',
   '  factory: (require) => {',
   '    const module = { exports: {} };',
   '    const exports = module.exports;',

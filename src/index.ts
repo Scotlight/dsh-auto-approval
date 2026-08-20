@@ -13,7 +13,7 @@ import {
 import { ReviewClient } from './reviewer.js'
 import { AutoApprovalWebBackend, AutoApprovalWebOps, installAutoApprovalWeb, installAutoApprovalOpsWeb } from './web.js'
 
-export const name = 'dsh-auto-approval'
+export const name = 'dsh-guardian-approval'
 export { Config }
 export const inject = ['approval', 'credentials', 'settings', 'permissionPresets']
 

@@ -82,26 +82,26 @@ export class ReviewSession {
     try {
       config = resolveConfig(this.config())
     } catch (error) {
-      this.ctx.logger.warn('dsh-auto-approval has invalid settings')
+      this.ctx.logger.warn('dsh-guardian-approval has invalid settings')
       this.ctx.logger.warn(error)
       return next()
     }
 
     if (!config.enabled) {
-      this.ctx.logger.warn('dsh-auto-approval skipped approval request: plugin disabled')
+      this.ctx.logger.warn('dsh-guardian-approval skipped approval request: plugin disabled')
       return next()
     }
     const currentPreset = this.ctx.permissionPresets.current(request.agent.session.events)
     if (currentPreset !== AUTO_APPROVAL_PRESET) {
       this.ctx.logger.warn(
-        'dsh-auto-approval skipped approval request: preset=%s expected=%s',
+        'dsh-guardian-approval skipped approval request: preset=%s expected=%s',
         currentPreset,
         AUTO_APPROVAL_PRESET,
       )
       return next()
     }
     if (config.baseUrl === '' || config.model === '') {
-      this.ctx.logger.warn('dsh-auto-approval delegated approval request: endpoint or model missing')
+      this.ctx.logger.warn('dsh-guardian-approval delegated approval request: endpoint or model missing')
       delegateAudit(request, '评审接口或模型尚未配置，已转交人工审批。', startedAt, config.baseUrl)
       return next()
     }
@@ -136,14 +136,14 @@ export class ReviewSession {
 
     const credential = await this.ctx.credentials.resolve(AUTO_APPROVAL_CREDENTIAL)
     if (credential === undefined) {
-      this.ctx.logger.warn('dsh-auto-approval delegated approval request: credential missing')
+      this.ctx.logger.warn('dsh-guardian-approval delegated approval request: credential missing')
       delegateAudit(request, 'API Key 尚未配置，已转交人工审批。', startedAt, config.baseUrl)
       return next()
     }
 
     const evidence = buildReviewEvidence(request.agent.session, action, recovered.callSeq)
     this.ctx.logger.warn(
-      'dsh-auto-approval starting model review: tool=%s callId=%s model=%s',
+      'dsh-guardian-approval starting model review: tool=%s callId=%s model=%s',
       action.toolName,
       action.callId,
       config.model,
@@ -193,7 +193,7 @@ export class ReviewSession {
       // breaker fast-fails later requests with a readable reason instead of
       // endlessly falling back to the human approval UI.
       this.circuit.record(key, 'error', config)
-      this.ctx.logger.warn('dsh-auto-approval review failed: %s', reviewError.code)
+      this.ctx.logger.warn('dsh-guardian-approval review failed: %s', reviewError.code)
       return next()
     }
   }
